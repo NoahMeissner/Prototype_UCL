@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { OPTION_LABELS, getActiveSteps } from "@/lib/graph";
 import { Message, StepId, WizardState } from "@/lib/types";
 import descriptions from "@/lib/descriptions.json";
+import { getStubAnswer } from "@/lib/hygieneStub";
 
 interface ChatViewProps {
   state: WizardState;
@@ -42,18 +43,8 @@ export default function ChatView({ state, onReset }: ChatViewProps) {
     setError(null);
 
     try {
-      const res = await fetch("/api/hygiene", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          selections: state.selections,
-          freitextValues: state.freitextValues,
-          messages: next,
-        }),
-      });
-      if (!res.ok) throw new Error("Request failed");
-      const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.answer }]);
+      const answer = await getStubAnswer(state.selections, state.freitextValues, next);
+      setMessages((prev) => [...prev, { role: "assistant", content: answer }]);
     } catch {
       setError("The message could not be sent. Please try again.");
     } finally {

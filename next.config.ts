@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "export",
+  basePath: "/Prototype_UCL",
+  assetPrefix: "/Prototype_UCL",
+  images: { unoptimized: true },
 };
 
 export default nextConfig;
