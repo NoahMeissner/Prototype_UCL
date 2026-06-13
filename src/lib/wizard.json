@@ -1,0 +1,71 @@
+{
+  "steps": [
+    {
+      "id": 1,
+      "label": "Status",
+      "question": "What is the patient's status?",
+      "options": [
+        { "key": "bestaetigt", "label": "Confirmed" },
+        { "key": "verdacht", "label": "Suspected" },
+        { "key": "kontaktpatient", "label": "Contact Patient" }
+      ]
+    },
+    {
+      "id": 2,
+      "label": "Pathogen",
+      "question": "Which pathogen is involved?",
+      "options": [
+        { "key": "mrsa_andere", "label": "MRSA / Other" },
+        { "key": "mrgn_vre", "label": "3MRGN / 4MRGN / VRE" },
+        { "key": "c_difficile", "label": "C. difficile" }
+      ]
+    },
+    {
+      "id": 3,
+      "label": "Localisation",
+      "question": "Where is the pathogen located?",
+      "conditional": {
+        "skipConditions": [
+          { "step": 1, "ifAny": ["verdacht", "kontaktpatient"] },
+          { "step": 2, "ifOnly": ["c_difficile"] }
+        ],
+        "optionsBySelection": {
+          "mrsa_andere": [
+            { "key": "atemwege", "label": "Airways / Throat" },
+            { "key": "wunde", "label": "Wound" },
+            { "key": "urin_stuhl", "label": "Urine / Stool" },
+            { "key": "freitext", "label": "Free text", "hasFreitext": true }
+          ],
+          "mrgn_vre": [
+            { "key": "urin", "label": "Urine" },
+            { "key": "stuhl", "label": "Stool" },
+            { "key": "wunde", "label": "Wound" },
+            { "key": "freitext", "label": "Free text", "hasFreitext": true }
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "label": "Activity",
+      "question": "What activity is planned?",
+      "options": [
+        { "key": "koerpernahe_pflege", "label": "Personal Care" },
+        { "key": "kurzer_kontakt", "label": "Brief Contact" },
+        { "key": "invasiv", "label": "Invasive / Dressing Change" },
+        { "key": "transport", "label": "Transport" },
+        { "key": "freitext", "label": "Free text", "hasFreitext": true }
+      ]
+    },
+    {
+      "id": 5,
+      "label": "Factors",
+      "question": "Are there aggravating factors?",
+      "options": [
+        { "key": "husten", "label": "Coughing / Incontinence / Dementia" },
+        { "key": "keine", "label": "None" },
+        { "key": "freitext", "label": "Free text", "hasFreitext": true }
+      ]
+    }
+  ]
+}
