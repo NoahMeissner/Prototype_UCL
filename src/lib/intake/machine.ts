@@ -5,7 +5,7 @@ import {
   shouldEscalateUnknownCarriage,
 } from "./assumptions";
 import { createMdroIntakeContext, initialMdroIntakeContext } from "./context";
-import { carriageLabels, contextLabels, organismLabels, questions } from "./copy";
+import { bodyLocationLabels, carriageLabels, contextLabels, organismLabels, patientStatusLabels, questions } from "./copy";
 import { questionnaireItem } from "./questionnaire";
 import {
   IntakeContext,
@@ -88,7 +88,7 @@ export const intakeMachine = setup({
           context,
           questionnaireItem("organism", questions.organism.title, organismLabels[event.organism], event.organism)
         ),
-        pathTrace: trace(context, event.organism === "4mrgn" ? "redFlag" : "carriage"),
+        pathTrace: trace(context, event.organism === "4mrgn" ? "redFlag" : "patientStatus"),
       };
     }),
     recordRedFlag: assign(({ context, event }) => {
@@ -106,7 +106,19 @@ export const intakeMachine = setup({
           context,
           questionnaireItem("red-flag-risk", questions.redFlag.title, answer, event.risk)
         ),
-        pathTrace: trace(context, isEscalation ? "escalation" : "carriage"),
+        pathTrace: trace(context, isEscalation ? "escalation" : "patientStatus"),
+      };
+    }),
+    recordPatientStatus: assign(({ context, event }) => {
+      if (event.type !== "SELECT_PATIENT_STATUS") return context;
+      return {
+        ...context,
+        mdro: { ...context.mdro, patientStatus: event.status },
+        questionnaireResponse: appendItem(
+          context,
+          questionnaireItem("patient-status", questions.patientStatus.title, patientStatusLabels[event.status], event.status)
+        ),
+        pathTrace: trace(context, "carriage"),
       };
     }),
     recordCarriage: assign(({ context, event }) => {
@@ -126,7 +138,19 @@ export const intakeMachine = setup({
           context,
           questionnaireItem("carriage-status", questions.carriage.title, carriageLabels[event.status], event.status)
         ),
-        pathTrace: trace(context, escalation ? "escalation" : "careContext"),
+        pathTrace: trace(context, escalation ? "escalation" : "bodyLocation"),
+      };
+    }),
+    recordBodyLocation: assign(({ context, event }) => {
+      if (event.type !== "SELECT_BODY_LOCATION") return context;
+      return {
+        ...context,
+        mdro: { ...context.mdro, bodyLocation: event.location },
+        questionnaireResponse: appendItem(
+          context,
+          questionnaireItem("body-location", questions.bodyLocation.title, bodyLocationLabels[event.location], event.location)
+        ),
+        pathTrace: trace(context, "careContext"),
       };
     }),
     recordCareContext: assign(({ context, event }) => {
@@ -276,7 +300,7 @@ export const intakeMachine = setup({
             actions: "recordOrganism",
           },
           {
-            target: "carriage",
+            target: "patientStatus",
             actions: "recordOrganism",
           },
         ],
@@ -291,11 +315,26 @@ export const intakeMachine = setup({
             actions: ["recordRedFlag", "stopEscalation"],
           },
           {
-            target: "carriage",
+            target: "patientStatus",
             actions: "recordRedFlag",
           },
         ],
         BACK: "organism",
+      },
+    },
+    patientStatus: {
+      on: {
+        SELECT_PATIENT_STATUS: {
+          target: "carriage",
+          actions: "recordPatientStatus",
+        },
+        BACK: [
+          {
+            guard: ({ context }) => requiresRedFlagCheck(context.mdro.organism),
+            target: "redFlag",
+          },
+          { target: "organism" },
+        ],
       },
     },
     carriage: {
@@ -307,17 +346,20 @@ export const intakeMachine = setup({
             actions: ["recordCarriage", "stopEscalation"],
           },
           {
-            target: "careContext",
+            target: "bodyLocation",
             actions: "recordCarriage",
           },
         ],
-        BACK: [
-          {
-            guard: ({ context }) => requiresRedFlagCheck(context.mdro.organism),
-            target: "redFlag",
-          },
-          { target: "organism" },
-        ],
+        BACK: "patientStatus",
+      },
+    },
+    bodyLocation: {
+      on: {
+        SELECT_BODY_LOCATION: {
+          target: "careContext",
+          actions: "recordBodyLocation",
+        },
+        BACK: "carriage",
       },
     },
     careContext: {
@@ -333,7 +375,7 @@ export const intakeMachine = setup({
             actions: "recordCareContext",
           },
         ],
-        BACK: "carriage",
+        BACK: "bodyLocation",
       },
     },
     otherContext: {

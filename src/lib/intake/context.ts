@@ -1,9 +1,11 @@
-import { carriageLabels, contextLabels, organismLabels } from "./copy";
+import { bodyLocationLabels, carriageLabels, contextLabels, organismLabels, patientStatusLabels } from "./copy";
 import { ChatContext, IntakeContext, chatContextSchema } from "./schemas";
 
 function createEmptyMdroPayload(): IntakeContext["mdro"] {
   return {
     organism: null,
+    patientStatus: null,
+    bodyLocation: null,
     carriageStatus: null,
     careContext: null,
     preemptiveIsolationRisk: null,
@@ -64,7 +66,9 @@ export function buildChatContext(context: IntakeContext): ChatContext {
   }
   const organism = context.mdro.organism;
   if (organism) summary.push(organismLabels[organism]);
+  if (context.mdro.patientStatus) summary.push(patientStatusLabels[context.mdro.patientStatus]);
   if (context.mdro.carriageStatus) summary.push(carriageLabels[context.mdro.carriageStatus]);
+  if (context.mdro.bodyLocation) summary.push(bodyLocationLabels[context.mdro.bodyLocation]);
   if (context.mdro.careContext) summary.push(contextLabels[context.mdro.careContext]);
   if (context.mdro.otherContextText) summary.push(context.mdro.otherContextText);
 

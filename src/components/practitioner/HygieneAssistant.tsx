@@ -6,9 +6,11 @@ import { RotateCcw } from "lucide-react";
 import { createGeneralIntakeContext } from "@/lib/intake/context";
 import { intakeMachine } from "@/lib/intake/machine";
 import {
+  bodyLocationLabels,
   carriageLabels,
   contextLabels,
   organismLabels,
+  patientStatusLabels,
   questions,
 } from "@/lib/intake/copy";
 import ChatPanel from "./ChatPanel";
@@ -35,6 +37,10 @@ const organismChoices = createChoices(["mrsa", "vre", "3mrgn", "4mrgn", "unknown
 
 const carriageChoices = createChoices(["colonization", "infection", "unknown"], carriageLabels);
 
+const patientStatusChoices = createChoices(["confirmed", "suspected", "contact", "unknown"], patientStatusLabels);
+
+const bodyLocationChoices = createChoices(["airway", "wound", "urinary", "stool", "skin", "unknown"], bodyLocationLabels);
+
 const careContextChoices = createChoices(
   ["screening", "wound_care", "transport", "room_isolation", "ppe", "ward_routine", "other"],
   contextLabels
@@ -51,7 +57,9 @@ const redFlagChoices: NonEmptyChoices<RedFlagRisk> = [
 const stepLabels: Record<string, string> = {
   organism: "Erregergruppe",
   redFlag: "4MRGN-Risiko",
+  patientStatus: "Infektionsstatus",
   carriage: "Befundstatus",
+  bodyLocation: "Lokalisation",
   careContext: "Versorgungskontext",
   otherContext: "Freitext",
 };
@@ -59,8 +67,8 @@ const stepLabels: Record<string, string> = {
 function Progress({ value, includesRedFlag }: { value: unknown; includesRedFlag: boolean }) {
   const state = String(value);
   const order = includesRedFlag
-    ? ["organism", "redFlag", "carriage", "careContext", "otherContext"]
-    : ["organism", "carriage", "careContext", "otherContext"];
+    ? ["organism", "redFlag", "patientStatus", "carriage", "bodyLocation", "careContext", "otherContext"]
+    : ["organism", "patientStatus", "carriage", "bodyLocation", "careContext", "otherContext"];
   const activeIndex = Math.max(0, order.includes(state) ? order.indexOf(state) : order.length - 1);
   const total = order.length - (state === "otherContext" ? 0 : 1);
   const displayedTotal = state === "otherContext" ? order.length : total;
@@ -185,6 +193,16 @@ export default function HygieneAssistant() {
             />
           )}
 
+          {mode === "mdro" && stateValue === "patientStatus" && (
+            <QuestionStep
+              eyebrow={questions.patientStatus.eyebrow}
+              title={questions.patientStatus.title}
+              hint={questions.patientStatus.hint}
+              choices={patientStatusChoices}
+              onSubmit={(value) => send({ type: "SELECT_PATIENT_STATUS", status: value })}
+            />
+          )}
+
           {mode === "mdro" && stateValue === "carriage" && (
             <QuestionStep
               eyebrow={questions.carriage.eyebrow}
@@ -192,6 +210,16 @@ export default function HygieneAssistant() {
               hint={questions.carriage.hint}
               choices={carriageChoices}
               onSubmit={(value) => send({ type: "SELECT_CARRIAGE_STATUS", status: value })}
+            />
+          )}
+
+          {mode === "mdro" && stateValue === "bodyLocation" && (
+            <QuestionStep
+              eyebrow={questions.bodyLocation.eyebrow}
+              title={questions.bodyLocation.title}
+              hint={questions.bodyLocation.hint}
+              choices={bodyLocationChoices}
+              onSubmit={(value) => send({ type: "SELECT_BODY_LOCATION", location: value })}
             />
           )}
 

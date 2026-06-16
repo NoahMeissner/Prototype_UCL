@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const organismGroupSchema = z.enum(["mrsa", "vre", "3mrgn", "4mrgn", "unknown"]);
 export const carriageStatusSchema = z.enum(["colonization", "infection", "unknown"]);
+export const patientStatusSchema = z.enum(["confirmed", "suspected", "contact", "unknown"]);
+export const bodyLocationSchema = z.enum(["airway", "wound", "urinary", "stool", "skin", "unknown"]);
 export const topicClassSchema = z.enum(["mdro", "general"]);
 export const careContextSchema = z.enum([
   "screening",
@@ -46,6 +48,8 @@ export const commonContractSchema = z.object({
 
 export const mdroPayloadSchema = z.object({
   organism: organismGroupSchema.nullable(),
+  patientStatus: patientStatusSchema.nullable(),
+  bodyLocation: bodyLocationSchema.nullable(),
   carriageStatus: carriageStatusSchema.nullable(),
   careContext: careContextSchema.nullable(),
   preemptiveIsolationRisk: z.boolean().nullable(),
@@ -125,6 +129,8 @@ export const chatContextSchema = z.object({
 
 export type OrganismGroup = z.infer<typeof organismGroupSchema>;
 export type CarriageStatus = z.infer<typeof carriageStatusSchema>;
+export type PatientStatus = z.infer<typeof patientStatusSchema>;
+export type BodyLocation = z.infer<typeof bodyLocationSchema>;
 export type TopicClass = z.infer<typeof topicClassSchema>;
 export type CareContext = z.infer<typeof careContextSchema>;
 export type SourceAgreement = z.infer<typeof sourceAgreementSchema>;
@@ -145,7 +151,9 @@ export type ChatContext = z.infer<typeof chatContextSchema>;
 export type IntakeStep =
   | "organism"
   | "redFlag"
+  | "patientStatus"
   | "carriage"
+  | "bodyLocation"
   | "careContext"
   | "otherContext"
   | "chatReady"
@@ -156,7 +164,9 @@ export type IntakeStep =
 export type IntakeEvent =
   | { type: "SELECT_ORGANISM"; organism: OrganismGroup }
   | { type: "SELECT_RED_FLAG_RISK"; risk: "yes" | "no" | "unknown" }
+  | { type: "SELECT_PATIENT_STATUS"; status: PatientStatus }
   | { type: "SELECT_CARRIAGE_STATUS"; status: CarriageStatus }
+  | { type: "SELECT_BODY_LOCATION"; location: BodyLocation }
   | { type: "SELECT_CARE_CONTEXT"; context: CareContext }
   | { type: "ENTER_OTHER_CONTEXT"; text: string }
   | { type: "SELECT_SOURCE_STATUS"; sourceAgreement: SourceAgreement }

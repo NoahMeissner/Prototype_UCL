@@ -1,4 +1,4 @@
-import { CareContext, CarriageStatus, OrganismGroup, TerminalTarget } from "./schemas";
+import { BodyLocation, CareContext, CarriageStatus, OrganismGroup, PatientStatus, TerminalTarget } from "./schemas";
 
 export const organismLabels: Record<OrganismGroup, string> = {
   mrsa: "MRSA",
@@ -12,6 +12,22 @@ export const carriageLabels: Record<CarriageStatus, string> = {
   colonization: "Kolonisation",
   infection: "Infektion",
   unknown: "Nicht sicher",
+};
+
+export const patientStatusLabels: Record<PatientStatus, string> = {
+  confirmed: "Bestätigter Fall",
+  suspected: "Verdachtsfall",
+  contact: "Kontaktperson",
+  unknown: "Nicht sicher",
+};
+
+export const bodyLocationLabels: Record<BodyLocation, string> = {
+  airway: "Atemwege",
+  wound: "Wunde / Haut",
+  urinary: "Harnwege",
+  stool: "Stuhl / Darm",
+  skin: "Hautbesiedlung (asymptomatisch)",
+  unknown: "Nicht bekannt",
 };
 
 export const contextLabels: Record<CareContext, string> = {
@@ -40,10 +56,20 @@ export const questions = {
     title: "Liegt ein Risikohinweis für präemptive Isolierung vor?",
     hint: "Zum Beispiel relevanter Auslandsaufenthalt, Kontakt im selben Zimmer oder Aufenthalt in einer Hochprävalenzregion.",
   },
+  patientStatus: {
+    eyebrow: "Infektionsstatus",
+    title: "Wie ist der aktuelle Status der Person?",
+    hint: "Ein bestätigter Fall hat positiv getestet. Ein Verdachtsfall zeigt Symptome, das Ergebnis steht aus. Eine Kontaktperson hatte engen Kontakt zu einem Infizierten, aber keine Symptome.",
+  },
   carriage: {
     eyebrow: "Befundstatus",
     title: "Handelt es sich um Kolonisation oder Infektion?",
-    hint: "Wenn der Status unklar ist, wählen Sie „Nicht sicher“.",
+    hint: 'Wenn der Status unklar ist, wählen Sie "Nicht sicher".',
+  },
+  bodyLocation: {
+    eyebrow: "Lokalisation",
+    title: "Wo wurde der Erreger nachgewiesen?",
+    hint: "Die Lokalisation bestimmt, welche Körperstellen beim Kontakt besonders geschützt werden müssen.",
   },
   careContext: {
     eyebrow: "Versorgungskontext",
