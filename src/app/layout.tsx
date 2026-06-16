@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hygiene Assistant",
-  description: "Clinical hygiene assistant for medical staff",
+  title: "ASEPSIS Hygiene-Assistent",
+  description: "Strukturierte MDRO/MRE-Erfassung und allgemeine Hygiene-Fragen",
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="de"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
