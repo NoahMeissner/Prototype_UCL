@@ -1,5 +1,5 @@
 import { chatCopy } from "@/lib/intake/copy";
-import { AnswerGrounding, ChatMessage } from "@/lib/intake/schemas";
+import { AnswerGrounding, ChatMessage, SourceCitation } from "@/lib/intake/schemas";
 import AnswerSection from "./AnswerSection";
 import GroundingBadge from "./GroundingBadge";
 import SourceEvidenceList from "./SourceEvidenceList";
@@ -12,18 +12,12 @@ const fallbackGrounding: AnswerGrounding = {
 
 interface ClinicalAnswerCardProps {
   message: ChatMessage;
-  isEvidenceActive?: boolean;
-  selectedSourceId?: string | null;
-  onSelectSource?: (sourceId: string, answerMessageId: string) => void;
-  onOpenEvidence?: (answerMessageId: string) => void;
+  onOpenFullscreen?: (source: SourceCitation) => void;
 }
 
 export default function ClinicalAnswerCard({
   message,
-  isEvidenceActive = false,
-  selectedSourceId,
-  onSelectSource,
-  onOpenEvidence,
+  onOpenFullscreen,
 }: ClinicalAnswerCardProps) {
   const grounding = message.grounding ?? fallbackGrounding;
   const sections = [
@@ -37,12 +31,7 @@ export default function ClinicalAnswerCard({
   return (
     <article
       id={`answer-${message.id}`}
-      className={[
-        "max-w-[94%] overflow-hidden rounded-md border-l-4 bg-white text-sm transition sm:max-w-[82%]",
-        isEvidenceActive
-          ? "border-l-teal-500 bg-teal-50/25 shadow-[0_10px_32px_rgba(15,118,110,0.08)]"
-          : "border-l-transparent shadow-[0_8px_24px_rgba(15,23,42,0.045)]",
-      ].join(" ")}
+      className="max-w-[94%] overflow-hidden rounded-md border-l-4 border-l-transparent bg-white text-sm shadow-[0_8px_24px_rgba(15,23,42,0.045)] sm:max-w-[82%]"
     >
       <div className="space-y-3 px-4 py-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -64,9 +53,7 @@ export default function ClinicalAnswerCard({
       <SourceEvidenceList
         grounding={grounding}
         answerMessageId={message.id}
-        selectedSourceId={selectedSourceId}
-        onSelectSource={onSelectSource}
-        onOpenEvidence={onOpenEvidence}
+        onOpenFullscreen={onOpenFullscreen}
       />
     </article>
   );

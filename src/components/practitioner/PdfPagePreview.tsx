@@ -6,6 +6,7 @@ import { SourceCitation } from "@/lib/intake/schemas";
 interface PdfPagePreviewProps {
   source: SourceCitation;
   maxWidth?: number;
+  cropToBbox?: boolean;
   className?: string;
 }
 

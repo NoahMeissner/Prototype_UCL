@@ -68,19 +68,38 @@ function PdfHighlightOverlay({
 interface PdfPagePreviewRendererProps {
   source: SourceCitation;
   maxWidth?: number;
+  cropToBbox?: boolean;
   className?: string;
 }
 
 export default function PdfPagePreviewRenderer({
   source,
   maxWidth = 360,
+  cropToBbox = false,
   className = "",
 }: PdfPagePreviewRendererProps) {
   const [containerRef, containerWidth] = useElementWidth<HTMLDivElement>();
+  const [renderedHeight, setRenderedHeight] = useState<number | null>(null);
   const page = source.page ?? source.bbox?.page ?? source.bboxes?.[0]?.page ?? 1;
   const bboxes = sourceBboxes(source);
   const file = useMemo(() => (source.pdfUrl ? { url: source.pdfUrl } : null), [source.pdfUrl]);
   const pageWidth = Math.max(220, Math.min(containerWidth || maxWidth, maxWidth));
+
+  useEffect(() => {
+    setRenderedHeight(null);
+  }, [source.pdfUrl, page]);
+
+  const primaryBbox = cropToBbox ? (bboxes.find((b) => b.page === page) ?? null) : null;
+  const isCropped = cropToBbox && primaryBbox !== null && renderedHeight !== null;
+
+  let clipTop = 0;
+  let clipHeight: number | undefined = undefined;
+
+  if (isCropped && primaryBbox && renderedHeight) {
+    const padding = Math.max(16, primaryBbox.height * renderedHeight * 0.25);
+    clipTop = Math.max(0, primaryBbox.y * renderedHeight - padding);
+    clipHeight = primaryBbox.height * renderedHeight + padding * 2;
+  }
 
   if (!file) {
     return (
@@ -115,19 +134,26 @@ export default function PdfPagePreviewRenderer({
           </div>
         }
       >
-        <div className="relative mx-auto inline-block bg-white">
-          <Page
-            pageNumber={page}
-            width={pageWidth}
-            loading={
-              <div className="flex min-h-52 items-center justify-center text-sm font-medium text-zinc-500">
-                Seite wird geladen...
-              </div>
-            }
-            renderAnnotationLayer
-            renderTextLayer
-          />
-          <PdfHighlightOverlay bboxes={bboxes} page={page} />
+        <div style={{ overflow: "hidden", height: clipHeight }}>
+          <div style={{ transform: isCropped ? `translateY(${-clipTop}px)` : undefined }}>
+            <div className="relative mx-auto inline-block bg-white">
+              <Page
+                pageNumber={page}
+                width={pageWidth}
+                loading={
+                  <div className="flex min-h-52 items-center justify-center text-sm font-medium text-zinc-500">
+                    Seite wird geladen...
+                  </div>
+                }
+                renderAnnotationLayer
+                renderTextLayer
+                onRenderSuccess={(p: { width: number; height: number }) => {
+                  setRenderedHeight(p.height);
+                }}
+              />
+              <PdfHighlightOverlay bboxes={bboxes} page={page} />
+            </div>
+          </div>
         </div>
       </Document>
     </div>
